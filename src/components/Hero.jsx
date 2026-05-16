@@ -1,0 +1,218 @@
+import { useEffect, useRef, useState, useMemo } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
+
+const FRAME_COUNT = 144
+
+// Pre-generate particle styles to avoid random values in render
+const PARTICLES = Array.from({ length: 15 }, (_, i) => ({
+  width: 2 + (i * 17 % 5),
+  left: (i * 23 + 7) % 100,
+  bottom: (i * 13) % 20,
+  duration: 8 + (i * 11 % 12),
+  delay: (i * 7 % 10),
+}))
+
+export default function Hero() {
+  const containerRef = useRef(null)
+  const canvasRef = useRef(null)
+  const [images, setImages] = useState([])
+  const [loaded, setLoaded] = useState(0)
+  const frameIndexRef = useRef(0)
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end end'],
+  })
+
+  // All useTransform hooks called unconditionally at top level
+  const frameIndex = useTransform(scrollYProgress, [0, 1], [0, FRAME_COUNT - 1])
+  const textOpacity = useTransform(scrollYProgress, [0.15, 0.35, 0.7, 0.85], [0, 1, 1, 0])
+  const textY = useTransform(scrollYProgress, [0.15, 0.35, 0.7, 0.85], [60, 0, 0, -80])
+  const badgeOpacity = useTransform(scrollYProgress, [0.1, 0.25], [0, 1])
+  const ctaOpacity = useTransform(scrollYProgress, [0.3, 0.45, 0.7, 0.85], [0, 1, 1, 0])
+  const bigTextY = useTransform(scrollYProgress, [0.0, 0.9], [100, -250])
+  const bigTextOpacity = useTransform(scrollYProgress, [0.05, 0.2, 0.75, 0.9], [0, 0.08, 0.12, 0])
+  const scrollHintOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0])
+
+  const frameUrls = useMemo(() =>
+    Array.from({ length: FRAME_COUNT }, (_, i) =>
+      `/frames/ezgif-frame-${String(i + 1).padStart(3, '0')}.jpg`
+    ), [])
+
+  // Preload frames and show page immediately after first frame
+  useEffect(() => {
+    const loadedImages = new Array(FRAME_COUNT).fill(null)
+    let count = 0
+    frameUrls.forEach((url, i) => {
+      const img = new Image()
+      img.src = url
+      img.onload = img.onerror = () => {
+        count++
+        setLoaded(count)
+        loadedImages[i] = img
+        // Render immediately once the very first frame is ready!
+        if (i === 0) setImages(loadedImages)
+      }
+    })
+  }, [frameUrls])
+
+  // Canvas rendering with DPR scaling and cover-fit
+  useEffect(() => {
+    if (images.length === 0) return
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    const dpr = window.devicePixelRatio || 1
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth * dpr
+      canvas.height = window.innerHeight * dpr
+      canvas.style.width = window.innerWidth + 'px'
+      canvas.style.height = window.innerHeight + 'px'
+    }
+    resizeCanvas()
+    window.addEventListener('resize', resizeCanvas)
+
+    // Draw image with cover-fit at native pixel density
+    function drawCover(img) {
+      const cw = canvas.width, ch = canvas.height
+      const iw = img.naturalWidth, ih = img.naturalHeight
+      const scale = Math.max(cw / iw, ch / ih)
+      const sw = iw * scale, sh = ih * scale
+      ctx.clearRect(0, 0, cw, ch)
+      // Disable smoothing for pixel-perfect sharpness at 1080p
+      ctx.imageSmoothingEnabled = false
+      ctx.drawImage(img, (cw - sw) / 2, (ch - sh) / 2, sw, sh)
+    }
+
+    let animId
+    function renderFrame() {
+      const idx = Math.min(Math.max(0, Math.round(frameIndex.get())), FRAME_COUNT - 1)
+      if (idx !== frameIndexRef.current) {
+        frameIndexRef.current = idx
+        if (images[idx]?.complete) drawCover(images[idx])
+      }
+      animId = requestAnimationFrame(renderFrame)
+    }
+    drawCover(images[0])
+    animId = requestAnimationFrame(renderFrame)
+
+    return () => {
+      cancelAnimationFrame(animId)
+      window.removeEventListener('resize', resizeCanvas)
+    }
+  }, [images, frameIndex])
+
+  const loadingPercent = Math.round((loaded / FRAME_COUNT) * 100)
+  const isLoaded = images.length > 0
+
+  return (
+    <div ref={containerRef} className="relative h-[400vh]">
+      {/* Loading screen */}
+      {!isLoaded && (
+        <div className="fixed inset-0 z-[200] bg-[#050a12] flex flex-col items-center justify-center gap-6">
+          <div className="font-['Outfit'] text-white/40 text-sm tracking-[6px] uppercase">Loading Experience</div>
+          <div className="w-48 h-[2px] bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full transition-all duration-300"
+              style={{ width: `${loadingPercent}%` }}
+            />
+          </div>
+          <div className="text-white/30 text-xs font-mono">{loadingPercent}%</div>
+        </div>
+      )}
+
+      {/* Sticky hero viewport */}
+      <div className="hero-canvas-wrapper">
+        {/* Layer 1: Canvas */}
+        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+
+        {/* Layer 2: Giant VELAMMAL text */}
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center z-[2] pointer-events-none"
+          style={{ y: bigTextY, opacity: bigTextOpacity }}
+        >
+          <span className="font-['Outfit'] font-black text-white text-[clamp(5rem,20vw,24rem)] leading-none tracking-tighter select-none whitespace-nowrap">
+            VELAMMAL
+          </span>
+        </motion.div>
+
+        {/* Layer 3: Dark gradient */}
+        <div className="absolute inset-0 z-[3] bg-gradient-to-b from-[#050a12]/15 via-transparent to-[#050a12]/80 pointer-events-none" />
+
+        {/* Layer 4: Content */}
+        <div className="absolute inset-0 z-[5] flex flex-col items-center justify-end pb-[10vh] md:pb-[12vh] px-6 text-center pointer-events-none">
+          <motion.div
+            className="flex flex-col items-center"
+            style={{ y: textY }}
+          >
+            {/* Badge */}
+            <motion.div
+              className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/25 px-5 py-2 rounded-full mb-6 backdrop-blur-md pointer-events-auto"
+              style={{ opacity: badgeOpacity }}
+            >
+              <span className="text-amber-300 text-xs md:text-sm font-semibold tracking-[3px] uppercase">
+                🎓 TNEA 1237 &nbsp;|&nbsp; Admissions 2026-27
+              </span>
+            </motion.div>
+
+            {/* Heading */}
+            <motion.h1
+              className="font-['Outfit'] font-extrabold text-white text-[clamp(2rem,6vw,4.5rem)] leading-[1.1] max-w-3xl mb-5"
+              style={{ opacity: textOpacity }}
+            >
+              Engineering the{' '}
+              <span className="bg-gradient-to-r from-amber-400 to-amber-200 bg-clip-text text-transparent">Future</span>
+            </motion.h1>
+
+            {/* Subtitle */}
+            <motion.p
+              className="text-white/60 text-sm md:text-lg max-w-xl mb-8 leading-relaxed"
+              style={{ opacity: textOpacity }}
+            >
+              Velammal Institute of Technology — Ranked 2nd in Tamil Nadu. NAAC Accredited. NBA Approved.
+            </motion.p>
+
+            {/* CTAs */}
+            <motion.div
+              className="flex flex-wrap gap-4 justify-center pointer-events-auto"
+              style={{ opacity: ctaOpacity }}
+            >
+              <a href="#campus" className="bg-white/10 border border-white/20 text-white px-8 py-3 rounded-full font-semibold text-sm backdrop-blur-md hover:bg-white/20 transition-all duration-300">
+                Explore Campus
+              </a>
+              <a href="https://admission.velammalitech.edu.in/" target="_blank" rel="noreferrer"
+                className="bg-gradient-to-r from-amber-500 to-amber-600 text-[#0a1628] px-8 py-3 rounded-full font-bold text-sm hover:shadow-[0_12px_40px_rgba(212,168,67,0.4)] hover:-translate-y-0.5 transition-all duration-300">
+                Admissions Open →
+              </a>
+            </motion.div>
+          </motion.div>
+        </div>
+
+        {/* Layer 5: Scroll indicator — always rendered, visibility controlled by opacity */}
+        <motion.div
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[6] flex flex-col items-center gap-2"
+          style={{ opacity: scrollHintOpacity }}
+        >
+          <span className="text-white/35 text-[0.6rem] tracking-[4px] uppercase font-medium">Scroll</span>
+          <div className="scroll-line" />
+        </motion.div>
+
+        {/* Particles */}
+        <div className="absolute inset-0 z-[4] pointer-events-none overflow-hidden">
+          {PARTICLES.map((p, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-amber-400/25"
+              style={{
+                width: p.width + 'px', height: p.width + 'px',
+                left: p.left + '%', bottom: p.bottom + '%',
+                animation: `floatParticle ${p.duration}s linear infinite`,
+                animationDelay: p.delay + 's',
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
