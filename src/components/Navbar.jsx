@@ -49,7 +49,7 @@ export default function Navbar() {
               </a>
             ))}
             <a
-              href="https://admission.velammalitech.edu.in/"
+              href="https://admission.velammalitech.edu.in/register"
               target="_blank"
               rel="noreferrer"
               className="bg-gradient-to-r from-amber-500 to-amber-600 text-[#0a1628] px-6 py-2.5 rounded-full text-sm font-bold tracking-wide hover:shadow-[0_8px_30px_rgba(212,168,67,0.4)] hover:-translate-y-0.5 transition-all duration-300"
@@ -107,7 +107,7 @@ export default function Navbar() {
               </motion.a>
             ))}
             <motion.a
-              href="https://admission.velammalitech.edu.in/"
+              href="https://admission.velammalitech.edu.in/register"
               target="_blank"
               rel="noreferrer"
               initial={{ opacity: 0, scale: 0.9 }}

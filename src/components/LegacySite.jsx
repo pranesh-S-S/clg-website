@@ -238,7 +238,7 @@ export default function LegacySite() {
           <h2 className="cta-title fade-up">Admissions Open 2026-27</h2>
           <p className="cta-desc fade-up">TNEA Code: <strong>1237</strong> &nbsp;|&nbsp; NAAC Accredited &nbsp;|&nbsp; NBA Approved &nbsp;|&nbsp; Anna University Affiliated</p>
           <div className="hero-buttons fade-up">
-            <a href="https://admission.velammalitech.edu.in/" className="btn-primary" target="_blank" rel="noreferrer">Register Online →</a>
+            <a href="https://admission.velammalitech.edu.in/register" className="btn-primary" target="_blank" rel="noreferrer">Register Online →</a>
             <a href="https://velammalitech.edu.in/wp-content/uploads/2024/03/VIT-Brochure-24_25-12P_compressed.pdf" className="btn-secondary" target="_blank" rel="noreferrer">Download Brochure</a>
           </div>
         </div>
@@ -265,7 +265,7 @@ export default function LegacySite() {
             </div>
             <div className="footer-col">
               <h4>Admissions</h4>
-              <a href="https://admission.velammalitech.edu.in/" target="_blank" rel="noreferrer">Online Registration</a>
+              <a href="https://admission.velammalitech.edu.in/register" target="_blank" rel="noreferrer">Online Registration</a>
               <a href="https://velammalitech.edu.in/scholarships/" target="_blank" rel="noreferrer">Scholarships</a>
               <a href="https://velammalitech.edu.in/hostel/" target="_blank" rel="noreferrer">Hostel Info</a>
               <a href="https://velammalitech.edu.in/campus-infrastructure/" target="_blank" rel="noreferrer">Infrastructure</a>

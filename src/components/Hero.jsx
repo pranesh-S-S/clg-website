@@ -178,7 +178,7 @@ export default function Hero() {
               <a href="#campus" className="bg-white/10 border border-white/20 text-white px-8 py-3 rounded-full font-semibold text-sm backdrop-blur-md hover:bg-white/20 transition-all duration-300">
                 Explore Campus
               </a>
-              <a href="https://admission.velammalitech.edu.in/" target="_blank" rel="noreferrer"
+              <a href="https://admission.velammalitech.edu.in/register" target="_blank" rel="noreferrer"
                 className="bg-gradient-to-r from-amber-500 to-amber-600 text-[#0a1628] px-8 py-3 rounded-full font-bold text-sm hover:shadow-[0_12px_40px_rgba(212,168,67,0.4)] hover:-translate-y-0.5 transition-all duration-300">
                 Admissions Open →
               </a>
