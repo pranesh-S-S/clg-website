@@ -174,7 +174,6 @@ export default function Hero() {
             {/* CTAs */}
             <motion.div
               className="flex flex-wrap gap-4 justify-center pointer-events-auto"
-              style={{ opacity: ctaOpacity }}
             >
               <a href="#campus" className="bg-white/10 border border-white/20 text-white px-8 py-3 rounded-full font-semibold text-sm backdrop-blur-md hover:bg-white/20 transition-all duration-300">
                 Explore Campus
