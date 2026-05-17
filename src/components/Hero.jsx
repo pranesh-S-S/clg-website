@@ -124,7 +124,11 @@ export default function Hero() {
   const isLoaded = images.length > 0
 
   return (
-    <div ref={containerRef} className="relative h-[250vh] md:h-[400vh]">
+    <div 
+      ref={containerRef} 
+      className="relative"
+      style={{ height: typeof window !== 'undefined' && window.innerWidth < 768 ? '250vh' : '400vh' }}
+    >
       {/* Loading screen */}
       {!isLoaded && (
         <div className="fixed inset-0 z-[200] bg-[#050a12] flex flex-col items-center justify-center gap-6">
