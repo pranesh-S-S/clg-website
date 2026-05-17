@@ -97,11 +97,27 @@ export default function Hero() {
     const isMobile = window.innerWidth < 768
     const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.5)
 
+    let drawParams = { dx: 0, dy: 0, sw: 0, sh: 0 }
+
     function resizeCanvas() {
-      canvas.width = window.innerWidth * dpr
-      canvas.height = window.innerHeight * dpr
+      const cw = window.innerWidth * dpr
+      const ch = window.innerHeight * dpr
+      canvas.width = cw
+      canvas.height = ch
       canvas.style.width = window.innerWidth + 'px'
       canvas.style.height = window.innerHeight + 'px'
+      
+      // Pre-calculate image drawing parameters to save CPU on scroll
+      if (images[0]) {
+        const iw = images[0].naturalWidth || 1920
+        const ih = images[0].naturalHeight || 1080
+        const scale = Math.max(cw / iw, ch / ih)
+        drawParams.sw = iw * scale
+        drawParams.sh = ih * scale
+        drawParams.dx = (cw - drawParams.sw) / 2
+        drawParams.dy = (ch - drawParams.sh) / 2
+      }
+
       // Redraw current frame after resize
       const idx = frameIndexRef.current
       if (images[idx]?.complete) drawCover(images[idx])
@@ -110,28 +126,22 @@ export default function Hero() {
     window.addEventListener('resize', resizeCanvas)
 
     function drawCover(img) {
-      const cw = canvas.width, ch = canvas.height
-      const iw = img.naturalWidth, ih = img.naturalHeight
-      const scale = Math.max(cw / iw, ch / ih)
-      const sw = iw * scale, sh = ih * scale
-      ctx.drawImage(img, (cw - sw) / 2, (ch - sh) / 2, sw, sh)
+      ctx.drawImage(img, drawParams.dx, drawParams.dy, drawParams.sw, drawParams.sh)
     }
 
-    let animId
-    function renderFrame() {
-      const idx = Math.min(Math.max(0, Math.round(frameIndex.get())), FRAME_COUNT - 1)
+    const unsubscribe = frameIndex.on("change", (latest) => {
+      const idx = Math.min(Math.max(0, Math.round(latest)), FRAME_COUNT - 1)
       if (idx !== frameIndexRef.current) {
         frameIndexRef.current = idx
         if (images[idx]?.complete) drawCover(images[idx])
       }
-      animId = requestAnimationFrame(renderFrame)
-    }
+    })
+
     // Draw first frame immediately
     if (images[0]?.complete) drawCover(images[0])
-    animId = requestAnimationFrame(renderFrame)
 
     return () => {
-      cancelAnimationFrame(animId)
+      unsubscribe()
       window.removeEventListener('resize', resizeCanvas)
     }
   }, [images, frameIndex])
