@@ -31,15 +31,15 @@ export default function Hero() {
   // Text starts hidden, fades in as it rises from bottom, stays solid
   const textOpacity = useTransform(scrollYProgress, [0.12, 0.3, 0.85, 1], [0, 1, 1, 0])
 
-  // Text starts far below (bottom of screen), rises to center, and STAYS at center
-  const textY = useTransform(scrollYProgress, [0.12, 0.4, 1], [350, 0, 0])
+  // Text starts below viewport, rises to center, and STAYS at center
+  // 150px offset works on both mobile (small viewport) and desktop
+  const textY = useTransform(scrollYProgress, [0.12, 0.4, 1], [150, 0, 0])
 
   // Badge fades in slightly before the main text
   const badgeOpacity = useTransform(scrollYProgress, [0.1, 0.24], [0, 1])
 
-  // CTA buttons appear after text is settled
-  // CTA buttons appear after text is settled, stay visible
-  const ctaOpacity = useTransform(scrollYProgress, [0.3, 0.45, 0.85, 1], [0, 1, 1, 0])
+  // CTA buttons appear together with text, stay visible
+  const ctaOpacity = useTransform(scrollYProgress, [0.18, 0.32, 0.85, 1], [0, 1, 1, 0])
 
   // Giant background VELAMMAL text
   const bigTextY = useTransform(scrollYProgress, [0.0, 0.9], [100, -250])
@@ -196,11 +196,11 @@ export default function Hero() {
               className="flex flex-wrap gap-4 justify-center pointer-events-auto"
               style={{ opacity: ctaOpacity }}
             >
-              <a href="#campus" className="bg-white/10 border border-white/20 text-white px-8 py-3 rounded-full font-semibold text-sm backdrop-blur-md hover:bg-white/20 transition-all duration-300">
+              <a href="#campus" className="bg-white/20 border-2 border-white/50 text-white px-8 py-3 rounded-full font-bold text-sm backdrop-blur-md hover:bg-white/30 transition-all duration-300 shadow-[0_4px_20px_rgba(255,255,255,0.15)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
                 Explore Campus
               </a>
               <a href="https://admission.velammalitech.edu.in/register" target="_blank" rel="noreferrer"
-                className="bg-gradient-to-r from-amber-500 to-amber-600 text-[#0a1628] px-8 py-3 rounded-full font-bold text-sm hover:shadow-[0_12px_40px_rgba(212,168,67,0.4)] hover:-translate-y-0.5 transition-all duration-300">
+                className="bg-gradient-to-r from-amber-400 to-amber-500 text-[#0a1628] px-8 py-3 rounded-full font-extrabold text-sm shadow-[0_4px_25px_rgba(251,191,36,0.5)] hover:shadow-[0_12px_40px_rgba(212,168,67,0.6)] hover:-translate-y-0.5 transition-all duration-300">
                 Admissions Open →
               </a>
             </motion.div>

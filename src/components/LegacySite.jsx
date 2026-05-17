@@ -178,7 +178,7 @@ export default function LegacySite() {
           <p className="section-desc fade-up">World-class infrastructure at Chennai–Kolkata Highway, Panchetti with everything students need to thrive.</p>
           <div className="campus-grid">
             <div className="campus-card fade-up">
-              <img src="https://images.unsplash.com/photo-1523050854058-8df90110c476?w=800&q=80" alt="Sports facilities" />
+              <img src="https://velammalitech.edu.in/wp-content/uploads/2023/07/sports-1.jpg" alt="Sports & NCC facilities at VIT" />
               <div className="campus-card-overlay"><div><h4>Sports & NCC</h4><p>Athletics, NCC & inter-college competitions</p></div></div>
             </div>
             <div className="campus-card fade-up fade-up-delay-1">
