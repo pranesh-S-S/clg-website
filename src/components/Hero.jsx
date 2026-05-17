@@ -29,17 +29,17 @@ export default function Hero() {
   const frameIndex = useTransform(scrollYProgress, [0, 1], [0, FRAME_COUNT - 1])
 
   // Text fades in as it rises from bottom, stays solid permanently (no fade-out)
-  const textOpacity = useTransform(scrollYProgress, [0.1, 0.25], [0, 1])
+  const textOpacity = useTransform(scrollYProgress, [0.02, 0.15], [0, 1])
 
   // Text starts below viewport, rises to center, and STAYS at center
   // 150px offset works on both mobile (small viewport) and desktop
-  const textY = useTransform(scrollYProgress, [0.12, 0.4, 1], [150, 0, 0])
+  const textY = useTransform(scrollYProgress, [0.02, 0.25, 1], [150, 0, 0])
 
   // Badge fades in slightly before the main text
-  const badgeOpacity = useTransform(scrollYProgress, [0.1, 0.24], [0, 1])
+  const badgeOpacity = useTransform(scrollYProgress, [0.01, 0.12], [0, 1])
 
   // CTA buttons fade in with text, stay visible permanently
-  const ctaOpacity = useTransform(scrollYProgress, [0.15, 0.3], [0, 1])
+  const ctaOpacity = useTransform(scrollYProgress, [0.05, 0.2], [0, 1])
 
   // Giant background VELAMMAL text
   const bigTextY = useTransform(scrollYProgress, [0.0, 0.9], [100, -250])
@@ -178,15 +178,15 @@ export default function Hero() {
 
             {/* Heading */}
             <motion.h1
-              className="font-['Outfit'] font-extrabold text-white text-[clamp(2rem,6vw,4.5rem)] leading-[1.1] max-w-3xl mb-5 drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
+              className="font-['Outfit'] font-extrabold text-white text-[clamp(2rem,6vw,4.5rem)] leading-[1.1] max-w-3xl mb-5 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]"
             >
               Engineering the{' '}
-              <span className="bg-gradient-to-r from-amber-400 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(251,191,36,0.3)]">Future</span>
+              <span className="bg-gradient-to-r from-amber-400 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">Future</span>
             </motion.h1>
 
             {/* Subtitle */}
             <motion.p
-              className="text-white/95 text-sm md:text-lg max-w-xl mb-8 leading-relaxed drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] font-medium"
+              className="text-white/95 text-sm md:text-lg max-w-xl mb-8 leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] font-medium"
             >
               Velammal Institute of Technology — Ranked 2nd in Tamil Nadu. NAAC Accredited. NBA Approved.
             </motion.p>
