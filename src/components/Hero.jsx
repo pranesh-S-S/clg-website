@@ -26,10 +26,10 @@ export default function Hero() {
 
   // All useTransform hooks called unconditionally at top level
   const frameIndex = useTransform(scrollYProgress, [0, 1], [0, FRAME_COUNT - 1])
-  const textOpacity = useTransform(scrollYProgress, [0.15, 0.35, 0.7, 0.85], [0, 1, 1, 0])
+  const textOpacity = useTransform(scrollYProgress, [0.15, 0.35, 0.7, 1], [0, 1, 1, 1])
   const textY = useTransform(scrollYProgress, [0.15, 0.35, 0.7, 0.85], [60, 0, 0, -80])
   const badgeOpacity = useTransform(scrollYProgress, [0.1, 0.25], [0, 1])
-  const ctaOpacity = useTransform(scrollYProgress, [0.3, 0.45, 0.7, 0.85], [0, 1, 1, 0])
+  const ctaOpacity = useTransform(scrollYProgress, [0.3, 0.45, 0.7, 1], [0, 1, 1, 1])
   const bigTextY = useTransform(scrollYProgress, [0.0, 0.9], [100, -250])
   const bigTextOpacity = useTransform(scrollYProgress, [0.05, 0.2, 0.75, 0.9], [0, 0.08, 0.12, 0])
   const scrollHintOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0])
@@ -61,7 +61,8 @@ export default function Hero() {
     if (images.length === 0) return
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
-    const dpr = window.devicePixelRatio || 1
+    // Cap DPR at 1.5 to prevent extreme lag on high-DPR mobile devices
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
 
     function resizeCanvas() {
       canvas.width = window.innerWidth * dpr
@@ -188,13 +189,23 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        {/* Layer 5: Scroll indicator — always rendered, visibility controlled by opacity */}
+        {/* Bright Scroll Hint */}
         <motion.div
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[6] flex flex-col items-center gap-2"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 pointer-events-none z-[20]"
           style={{ opacity: scrollHintOpacity }}
         >
-          <span className="text-white/35 text-[0.6rem] tracking-[4px] uppercase font-medium">Scroll</span>
-          <div className="scroll-line" />
+          <span className="font-['Outfit'] text-xs uppercase tracking-[6px] text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] font-bold">
+            Scroll to Explore
+          </span>
+          <motion.div
+            className="w-8 h-12 border-2 border-amber-400/50 rounded-full flex justify-center p-1 relative shadow-[0_0_15px_rgba(251,191,36,0.3)]"
+          >
+            <motion.div
+              className="w-1.5 h-3 bg-amber-400 rounded-full shadow-[0_0_10px_rgba(251,191,36,1)]"
+              animate={{ y: [0, 20, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          </motion.div>
         </motion.div>
 
         {/* Particles */}

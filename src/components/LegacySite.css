@@ -608,15 +608,16 @@ section { padding: 100px 0; }
   background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
   text-align:center; padding: 100px 0; position:relative; overflow:hidden;
 }
+.cta-section .legacy-container { position: relative; z-index: 10; pointer-events: auto; }
 .cta-section::before {
   content:''; position:absolute; width:500px; height:500px;
   background: radial-gradient(circle, rgba(212,168,67,0.08) 0%, transparent 70%);
-  top:-200px; right:-100px; border-radius:50%;
+  top:-200px; right:-100px; border-radius:50%; pointer-events: none; z-index: 0;
 }
 .cta-section::after {
   content:''; position:absolute; width:400px; height:400px;
   background: radial-gradient(circle, rgba(58,123,253,0.06) 0%, transparent 70%);
-  bottom:-150px; left:-100px; border-radius:50%;
+  bottom:-150px; left:-100px; border-radius:50%; pointer-events: none; z-index: 0;
 }
 .cta-title {
   font-size: clamp(2rem, 4vw, 3rem); font-weight:800;
