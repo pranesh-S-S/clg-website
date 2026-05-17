@@ -158,17 +158,15 @@ export default function Hero() {
 
             {/* Heading */}
             <motion.h1
-              className="font-['Outfit'] font-extrabold text-white text-[clamp(2rem,6vw,4.5rem)] leading-[1.1] max-w-3xl mb-5"
-              style={{ opacity: textOpacity }}
+              className="font-['Outfit'] font-extrabold text-white text-[clamp(2rem,6vw,4.5rem)] leading-[1.1] max-w-3xl mb-5 drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
             >
               Engineering the{' '}
-              <span className="bg-gradient-to-r from-amber-400 to-amber-200 bg-clip-text text-transparent">Future</span>
+              <span className="bg-gradient-to-r from-amber-400 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(251,191,36,0.3)]">Future</span>
             </motion.h1>
 
             {/* Subtitle */}
             <motion.p
-              className="text-white/60 text-sm md:text-lg max-w-xl mb-8 leading-relaxed"
-              style={{ opacity: textOpacity }}
+              className="text-white/95 text-sm md:text-lg max-w-xl mb-8 leading-relaxed drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] font-medium"
             >
               Velammal Institute of Technology — Ranked 2nd in Tamil Nadu. NAAC Accredited. NBA Approved.
             </motion.p>
