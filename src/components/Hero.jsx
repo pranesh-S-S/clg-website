@@ -148,10 +148,10 @@ export default function Hero() {
           >
             {/* Badge */}
             <motion.div
-              className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/25 px-5 py-2 rounded-full mb-6 backdrop-blur-md pointer-events-auto"
+              className="inline-flex items-center gap-2 bg-[#050a12]/95 border border-amber-400/60 shadow-[0_0_15px_rgba(251,191,36,0.3)] px-5 py-2 rounded-full mb-6 backdrop-blur-md pointer-events-auto"
               style={{ opacity: badgeOpacity }}
             >
-              <span className="text-amber-300 text-xs md:text-sm font-semibold tracking-[3px] uppercase">
+              <span className="text-amber-400 text-xs md:text-sm font-bold tracking-[3px] uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                 🎓 TNEA 1237 &nbsp;|&nbsp; Admissions 2026-27
               </span>
             </motion.div>
@@ -189,8 +189,8 @@ export default function Hero() {
 
         {/* Bright Scroll Hint */}
         <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 pointer-events-none z-[20]"
-          style={{ opacity: scrollHintOpacity }}
+          className="absolute bottom-[12vh] md:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 pointer-events-none z-[20]"
+          style={{ opacity: scrollHintOpacity, scale: scrollHintOpacity }}
         >
           <span className="font-['Outfit'] text-xs uppercase tracking-[6px] text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] font-bold">
             Scroll to Explore
