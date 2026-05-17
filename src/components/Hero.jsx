@@ -28,18 +28,34 @@ export default function Hero() {
   // Frame sequencing: 0→143 over the entire scroll
   const frameIndex = useTransform(scrollYProgress, [0, 1], [0, FRAME_COUNT - 1])
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
+  // --- DESKTOP (LAPTOP) TIMINGS (100% UNTOUCHED) ---
+  const desktopOpacityRange = [0.15, 0.35];
+  const desktopYRange = [0.15, 0.4, 1];
+  const desktopYVals = [150, 0, 0];
+  const desktopBadgeOpacity = [0.12, 0.3];
+  const desktopCtaOpacity = [0.18, 0.38];
+
+  // --- MOBILE TIMINGS ---
+  // Trigger much earlier so text is guaranteed to be visible with just a small scroll
+  const mobileOpacityRange = [0.02, 0.12];
+  const mobileYRange = [0.02, 0.15, 1];
+  const mobileYVals = [50, 0, 0];
+  const mobileBadgeOpacity = [0.01, 0.1];
+  const mobileCtaOpacity = [0.03, 0.15];
+
   // Text fades in as it rises from bottom, stays solid permanently (no fade-out)
-  const textOpacity = useTransform(scrollYProgress, [0.15, 0.35], [0, 1])
+  const textOpacity = useTransform(scrollYProgress, isMobile ? mobileOpacityRange : desktopOpacityRange, [0, 1])
 
   // Text starts below viewport, rises to center, and STAYS at center
-  // 150px offset works on both mobile (small viewport) and desktop
-  const textY = useTransform(scrollYProgress, [0.15, 0.4, 1], [150, 0, 0])
+  const textY = useTransform(scrollYProgress, isMobile ? mobileYRange : desktopYRange, isMobile ? mobileYVals : desktopYVals)
 
   // Badge fades in slightly before the main text
-  const badgeOpacity = useTransform(scrollYProgress, [0.12, 0.3], [0, 1])
+  const badgeOpacity = useTransform(scrollYProgress, isMobile ? mobileBadgeOpacity : desktopBadgeOpacity, [0, 1])
 
   // CTA buttons fade in with text, stay visible permanently
-  const ctaOpacity = useTransform(scrollYProgress, [0.18, 0.38], [0, 1])
+  const ctaOpacity = useTransform(scrollYProgress, isMobile ? mobileCtaOpacity : desktopCtaOpacity, [0, 1])
 
   // Giant background VELAMMAL text
   const bigTextY = useTransform(scrollYProgress, [0.0, 0.9], [100, -250])
