@@ -29,17 +29,17 @@ export default function Hero() {
   const frameIndex = useTransform(scrollYProgress, [0, 1], [0, FRAME_COUNT - 1])
 
   // Text fades in as it rises from bottom, stays solid permanently (no fade-out)
-  const textOpacity = useTransform(scrollYProgress, [0.02, 0.15], [0, 1])
+  const textOpacity = useTransform(scrollYProgress, [0.15, 0.35], [0, 1])
 
   // Text starts below viewport, rises to center, and STAYS at center
   // 150px offset works on both mobile (small viewport) and desktop
-  const textY = useTransform(scrollYProgress, [0.02, 0.25, 1], [150, 0, 0])
+  const textY = useTransform(scrollYProgress, [0.15, 0.4, 1], [150, 0, 0])
 
   // Badge fades in slightly before the main text
-  const badgeOpacity = useTransform(scrollYProgress, [0.01, 0.12], [0, 1])
+  const badgeOpacity = useTransform(scrollYProgress, [0.12, 0.3], [0, 1])
 
   // CTA buttons fade in with text, stay visible permanently
-  const ctaOpacity = useTransform(scrollYProgress, [0.05, 0.2], [0, 1])
+  const ctaOpacity = useTransform(scrollYProgress, [0.18, 0.38], [0, 1])
 
   // Giant background VELAMMAL text
   const bigTextY = useTransform(scrollYProgress, [0.0, 0.9], [100, -250])
