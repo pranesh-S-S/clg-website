@@ -24,15 +24,31 @@ export default function Hero() {
     offset: ['start start', 'end end'],
   })
 
-  // All useTransform hooks called unconditionally at top level
+  // --- SCROLL TRANSFORMS ---
+  // Frame sequencing: 0→143 over the entire scroll
   const frameIndex = useTransform(scrollYProgress, [0, 1], [0, FRAME_COUNT - 1])
-  const textOpacity = useTransform(scrollYProgress, [0.15, 0.35, 0.7, 1], [0, 1, 1, 1])
-  const textY = useTransform(scrollYProgress, [0.15, 0.35, 0.7, 1], [60, 0, 0, -200])
-  const badgeOpacity = useTransform(scrollYProgress, [0.1, 0.25], [0, 1])
-  const ctaOpacity = useTransform(scrollYProgress, [0.3, 0.45, 0.7, 1], [0, 1, 1, 1])
+
+  // Text starts hidden, fades in after scroll begins, stays solid until end
+  const textOpacity = useTransform(scrollYProgress, [0.12, 0.28, 0.75, 0.92], [0, 1, 1, 0])
+
+  // Text starts below center, rises to center, holds, then slides up and out
+  const textY = useTransform(scrollYProgress, [0.12, 0.3, 0.65, 0.92], [120, 0, 0, -300])
+
+  // Badge fades in slightly before the main text
+  const badgeOpacity = useTransform(scrollYProgress, [0.1, 0.24], [0, 1])
+
+  // CTA buttons appear after text is settled
+  const ctaOpacity = useTransform(scrollYProgress, [0.25, 0.38, 0.75, 0.9], [0, 1, 1, 0])
+
+  // Giant background VELAMMAL text
   const bigTextY = useTransform(scrollYProgress, [0.0, 0.9], [100, -250])
   const bigTextOpacity = useTransform(scrollYProgress, [0.05, 0.2, 0.75, 0.9], [0, 0.08, 0.12, 0])
+
+  // Scroll hint disappears quickly
   const scrollHintOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0])
+
+  // Bottom gradient overlay intensifies near the end for clean transition
+  const overlayOpacity = useTransform(scrollYProgress, [0.7, 1], [0.8, 1])
 
   const frameUrls = useMemo(() =>
     Array.from({ length: FRAME_COUNT }, (_, i) =>
@@ -50,38 +66,37 @@ export default function Hero() {
         count++
         setLoaded(count)
         loadedImages[i] = img
-        // Render immediately once the very first frame is ready!
         if (i === 0) setImages(loadedImages)
       }
     })
   }, [frameUrls])
 
-  // Canvas rendering with DPR scaling and cover-fit
+  // Canvas rendering — throttled to only redraw on frame change
   useEffect(() => {
     if (images.length === 0) return
     const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    // Cap DPR at 1.5 to prevent extreme lag on high-DPR mobile devices
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
+    const ctx = canvas.getContext('2d', { alpha: false })
+    // Cap DPR at 1.5 on mobile to prevent GPU overload
+    const isMobile = window.innerWidth < 768
+    const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.5)
 
     function resizeCanvas() {
       canvas.width = window.innerWidth * dpr
       canvas.height = window.innerHeight * dpr
       canvas.style.width = window.innerWidth + 'px'
       canvas.style.height = window.innerHeight + 'px'
+      // Redraw current frame after resize
+      const idx = frameIndexRef.current
+      if (images[idx]?.complete) drawCover(images[idx])
     }
     resizeCanvas()
     window.addEventListener('resize', resizeCanvas)
 
-    // Draw image with cover-fit at native pixel density
     function drawCover(img) {
       const cw = canvas.width, ch = canvas.height
       const iw = img.naturalWidth, ih = img.naturalHeight
       const scale = Math.max(cw / iw, ch / ih)
       const sw = iw * scale, sh = ih * scale
-      ctx.clearRect(0, 0, cw, ch)
-      // Disable smoothing for pixel-perfect sharpness at 1080p
-      ctx.imageSmoothingEnabled = false
       ctx.drawImage(img, (cw - sw) / 2, (ch - sh) / 2, sw, sh)
     }
 
@@ -94,7 +109,8 @@ export default function Hero() {
       }
       animId = requestAnimationFrame(renderFrame)
     }
-    drawCover(images[0])
+    // Draw first frame immediately
+    if (images[0]?.complete) drawCover(images[0])
     animId = requestAnimationFrame(renderFrame)
 
     return () => {
@@ -137,14 +153,17 @@ export default function Hero() {
           </span>
         </motion.div>
 
-        {/* Layer 3: Dark gradient */}
-        <div className="absolute inset-0 z-[3] bg-gradient-to-b from-[#050a12]/15 via-transparent to-[#050a12]/80 pointer-events-none" />
+        {/* Layer 3: Dark gradient — intensifies at end for smooth transition */}
+        <motion.div
+          className="absolute inset-0 z-[3] pointer-events-none bg-gradient-to-b from-[#050a12]/15 via-transparent to-[#050a12]"
+          style={{ opacity: overlayOpacity }}
+        />
 
-        {/* Layer 4: Content */}
-        <div className="absolute inset-0 z-[5] flex flex-col items-center justify-end pb-[10vh] md:pb-[12vh] px-6 text-center pointer-events-none">
+        {/* Layer 4: Content — centered in viewport */}
+        <div className="absolute inset-0 z-[5] flex flex-col items-center justify-center px-6 text-center pointer-events-none">
           <motion.div
             className="flex flex-col items-center"
-            style={{ y: textY }}
+            style={{ y: textY, opacity: textOpacity }}
           >
             {/* Badge */}
             <motion.div
@@ -174,6 +193,7 @@ export default function Hero() {
             {/* CTAs */}
             <motion.div
               className="flex flex-wrap gap-4 justify-center pointer-events-auto"
+              style={{ opacity: ctaOpacity }}
             >
               <a href="#campus" className="bg-white/10 border border-white/20 text-white px-8 py-3 rounded-full font-semibold text-sm backdrop-blur-md hover:bg-white/20 transition-all duration-300">
                 Explore Campus
@@ -224,3 +244,4 @@ export default function Hero() {
     </div>
   )
 }
+
