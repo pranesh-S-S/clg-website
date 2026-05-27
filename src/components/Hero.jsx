@@ -1,10 +1,18 @@
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 
-const FRAME_COUNT = 144
+const TOTAL_FRAMES = 144
 
-// Pre-generate particle styles to avoid random values in render
-const PARTICLES = Array.from({ length: 15 }, (_, i) => ({
+// Detect mobile once at module level to avoid repeated checks
+const IS_MOBILE = typeof window !== 'undefined' && window.innerWidth < 768
+
+// On mobile, load only every 2nd frame (72 frames) to halve memory + network
+const FRAME_STEP = IS_MOBILE ? 2 : 1
+const FRAME_COUNT = Math.ceil(TOTAL_FRAMES / FRAME_STEP)
+
+// Fewer particles on mobile (5 vs 15) to reduce GPU compositing layers
+const PARTICLE_COUNT = IS_MOBILE ? 5 : 15
+const PARTICLES = Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
   width: 2 + (i * 17 % 5),
   left: (i * 23 + 7) % 100,
   bottom: (i * 13) % 20,
@@ -28,7 +36,7 @@ export default function Hero() {
   // Frame sequencing: 0→143 over the entire scroll
   const frameIndex = useTransform(scrollYProgress, [0, 1], [0, FRAME_COUNT - 1])
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const isMobile = IS_MOBILE;
 
   // --- DESKTOP (LAPTOP) TIMINGS (100% UNTOUCHED) ---
   const desktopOpacityRange = [0.15, 0.35];
@@ -67,10 +75,12 @@ export default function Hero() {
   // Bottom gradient overlay intensifies near the end for clean transition
   const overlayOpacity = useTransform(scrollYProgress, [0.7, 1], [0.8, 1])
 
+  // On mobile, skip every other frame (load frames 1,3,5,...) to halve downloads
   const frameUrls = useMemo(() =>
-    Array.from({ length: FRAME_COUNT }, (_, i) =>
-      `/frames/ezgif-frame-${String(i + 1).padStart(3, '0')}.jpg`
-    ), [])
+    Array.from({ length: FRAME_COUNT }, (_, i) => {
+      const actualFrame = i * FRAME_STEP + 1 // 1-indexed source filenames
+      return `/frames/ezgif-frame-${String(actualFrame).padStart(3, '0')}.jpg`
+    }), [])
 
   // Preload frames and show page immediately after first frame
   useEffect(() => {
@@ -88,16 +98,17 @@ export default function Hero() {
     })
   }, [frameUrls])
 
-  // Canvas rendering — throttled to only redraw on frame change
+  // Canvas rendering — rAF-throttled to prevent layout thrashing on mobile
   useEffect(() => {
     if (images.length === 0) return
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d', { alpha: false })
-    // Cap DPR at 1.5 on mobile to prevent GPU overload
-    const isMobile = window.innerWidth < 768
+    // DPR capped at 1 on mobile (saves 4x pixel fill), 1.5 on desktop
     const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.5)
 
     let drawParams = { dx: 0, dy: 0, sw: 0, sh: 0 }
+    let rafId = null
+    let pendingFrame = -1
 
     function resizeCanvas() {
       const cw = window.innerWidth * dpr
@@ -123,17 +134,30 @@ export default function Hero() {
       if (images[idx]?.complete) drawCover(images[idx])
     }
     resizeCanvas()
-    window.addEventListener('resize', resizeCanvas)
+    window.addEventListener('resize', resizeCanvas, { passive: true })
 
     function drawCover(img) {
       ctx.drawImage(img, drawParams.dx, drawParams.dy, drawParams.sw, drawParams.sh)
+    }
+
+    // Batch canvas draws into a single rAF to avoid redundant paints
+    function scheduleDrawFrame(idx) {
+      pendingFrame = idx
+      if (rafId === null) {
+        rafId = requestAnimationFrame(() => {
+          rafId = null
+          if (pendingFrame >= 0 && images[pendingFrame]?.complete) {
+            drawCover(images[pendingFrame])
+          }
+        })
+      }
     }
 
     const unsubscribe = frameIndex.on("change", (latest) => {
       const idx = Math.min(Math.max(0, Math.round(latest)), FRAME_COUNT - 1)
       if (idx !== frameIndexRef.current) {
         frameIndexRef.current = idx
-        if (images[idx]?.complete) drawCover(images[idx])
+        scheduleDrawFrame(idx)
       }
     })
 
@@ -142,6 +166,7 @@ export default function Hero() {
 
     return () => {
       unsubscribe()
+      if (rafId !== null) cancelAnimationFrame(rafId)
       window.removeEventListener('resize', resizeCanvas)
     }
   }, [images, frameIndex])
@@ -171,13 +196,13 @@ export default function Hero() {
 
       {/* Sticky hero viewport */}
       <div className="hero-canvas-wrapper">
-        {/* Layer 1: Canvas */}
-        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+        {/* Layer 1: Canvas — GPU-promoted for compositing */}
+        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" style={{ willChange: 'contents' }} />
 
         {/* Layer 2: Giant VELAMMAL text */}
         <motion.div
           className="absolute inset-0 flex items-center justify-center z-[2] pointer-events-none"
-          style={{ y: bigTextY, opacity: bigTextOpacity }}
+          style={{ y: bigTextY, opacity: bigTextOpacity, willChange: 'transform, opacity' }}
         >
           <span className="font-['Outfit'] font-black text-white text-[clamp(5rem,20vw,24rem)] leading-none tracking-tighter select-none whitespace-nowrap">
             VELAMMAL
@@ -194,7 +219,7 @@ export default function Hero() {
         <div className="absolute inset-0 z-[5] flex flex-col items-center justify-center px-6 text-center pointer-events-none">
           <motion.div
             className="flex flex-col items-center"
-            style={{ y: textY, opacity: textOpacity }}
+            style={{ y: textY, opacity: textOpacity, willChange: 'transform, opacity' }}
           >
             {/* Badge */}
             <motion.div

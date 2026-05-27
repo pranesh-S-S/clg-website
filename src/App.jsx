@@ -1,8 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, lazy, Suspense } from 'react'
 import SmoothScroll from './components/SmoothScroll'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
-import LegacySite from './components/LegacySite'
+
+// Lazy-load LegacySite — it's below the fold and not needed during Hero scroll.
+// This shaves ~17KB+ off the critical JS bundle so mobile CPUs focus on canvas.
+const LegacySite = lazy(() => import('./components/LegacySite'))
 
 /**
  * App — Root component.
@@ -34,8 +37,10 @@ export default function App() {
         {/* Dark fade from hero into legacy light mode */}
         <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-b from-[#050a12] via-[#050a12]/80 to-transparent pointer-events-none z-[11]" />
         
-        {/* Native React component for legacy content */}
-        <LegacySite />
+        {/* Native React component for legacy content — lazy loaded */}
+        <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+          <LegacySite />
+        </Suspense>
       </section>
     </SmoothScroll>
   )

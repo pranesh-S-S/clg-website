@@ -8,6 +8,8 @@ body {
   background: #050a12;
   color: #f0f0f0;
   overflow-x: hidden;
+  /* Prevent mobile scroll overscroll bounce which causes jank during Hero */
+  overscroll-behavior-y: none;
 }
 
 /* ===== CINEMATIC GRAIN OVERLAY ===== */
@@ -17,18 +19,33 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   mix-blend-mode: overlay;
 }
+/* Grain overlay forces a full-screen composite every frame — kill it on mobile */
+@media (max-width: 768px) {
+  .grain-overlay { display: none; }
+}
 
 /* ===== HERO CANVAS ===== */
 .hero-canvas-wrapper {
   position: sticky; top: 0;
   width: 100%; height: 100vh;
   overflow: hidden;
+  /* GPU-promote the entire hero so scroll transforms don't trigger repaints */
+  will-change: transform;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  contain: layout style paint;
 }
 .hero-canvas-wrapper canvas {
   width: 100%; height: 100%;
   display: block;
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
+}
+/* On mobile, let the browser auto-manage image rendering for speed */
+@media (max-width: 768px) {
+  .hero-canvas-wrapper canvas {
+    image-rendering: auto;
+  }
 }
 
 /* ===== SCROLL INDICATOR ===== */
@@ -49,4 +66,12 @@ body {
   15% { opacity: 1; transform: translateY(-15vh) scale(1); }
   85% { opacity: 0.4; }
   100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
+}
+/* Simplify particle animation on mobile to reduce GPU compositing work */
+@media (max-width: 768px) {
+  @keyframes floatParticle {
+    0% { transform: translateY(0); opacity: 0; }
+    15% { opacity: 0.6; }
+    100% { transform: translateY(-80vh); opacity: 0; }
+  }
 }
